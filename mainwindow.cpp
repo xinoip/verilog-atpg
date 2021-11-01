@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "delay_file.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -68,27 +69,6 @@ void MainWindow::on_convertButton_clicked()
 
         std::cout << "FILE NAME:" << ui->textEdit->toPlainText().toUtf8().constData() << std::endl;
         CurrentCircuit::circ.fillFromVerilogFile(ui->textEdit->toPlainText().toUtf8().constData());
-
-        std::ifstream inFile;
-        std::string fileName{"/home/pio/repo/plode-pio/foo.txt"};
-        inFile.open(fileName);
-        if (!inFile) {
-            std::cerr << "Unable to open file foo.txt"<<std::endl;
-            return;
-        }
-
-        std::string line;
-        std::vector<std::string> fileLines = Utils::getLinesFromDelayFile(fileName);
-        for (auto line : fileLines) {
-            std::vector<std::string> split = Utils::splitStringByDelimiter(line, ' ');
-            std::string& name = split[0];
-            int delay = std::stoi(split[1]);
-            for(int i = 0; i < CurrentCircuit::circ.elements.size(); i++) {
-                if(CurrentCircuit::circ.elements[i].elementName == name) {
-                    CurrentCircuit::circ.elements[i].delay = delay;
-                }
-            }
-        }
 
         CurrentCircuit::topological_sort();
 

@@ -48,6 +48,7 @@ void topological_sort_helper(std::string element_name, bool visited[], std::stac
 
 void CurrentCircuit::topological_sort() {
     Circuit& circ = CurrentCircuit::circ;
+    auto& adj = circ.adjacencyList;
     std::stack<int> stack;
     int vertex_count = circ.elements.size();
     bool* visited = new bool[vertex_count];
@@ -61,7 +62,34 @@ void CurrentCircuit::topological_sort() {
     while (stack.empty() == false) {
         int vertex = stack.top();
         auto& element = circ.elements[vertex];
-        printf("%s(d:%d)(a:%d) ", element.elementName.c_str(), element.delay, element.arrivalTime);
+        std::vector<CircuitElement> predecessor_elements;
+
+        for(auto& pair : adj) {
+            auto& second = pair.second;
+            for(auto& connection : second) {
+                if(connection.elementName == element.elementName) {
+                    predecessor_elements.push_back(pair.first);
+                }
+            }
+        }
+        
+        int max_arrival = 0;
+        for(auto& predecessor : predecessor_elements) {
+            int arrival_time = 0;
+            for(int i = 0; i < circ.elements.size(); i++) {
+                if(circ.elements[i].elementName == predecessor.elementName) {
+                    arrival_time = circ.elements[i].arrivalTime;
+                    break;
+                }
+            }
+            if(arrival_time > max_arrival) {
+                max_arrival = arrival_time;
+            }
+        }
+
+        element.arrivalTime += max_arrival + element.delay;
+
+        printf("%s(d:%d)(a:%d)\n", element.elementName.c_str(), element.delay, element.arrivalTime);
         stack.pop();
     }
     printf("\n");
