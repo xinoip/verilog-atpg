@@ -49,3 +49,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     Resources/Resources.qrc
+
+DESTDIR = build
+OBJECTS_DIR = build/obj
