@@ -6,3 +6,11 @@ To download and run the program correctly:
 2. Download QT Creator with QT5 and QTCharts support.
 3. Once all downloaded, it can be opened on QT Creator by opening the .pro file with QT Creator.
 4. After building, PLODE GUI is ready to go.
+
+
+# Build without QTCreator
+
+```
+qmake-qt5 PLODE.pro
+make
+```
