@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>plode-big.png</file>
+        <file>plode-small.png</file>
+        <file>finished.wav</file>
+    </qresource>
+</RCC>

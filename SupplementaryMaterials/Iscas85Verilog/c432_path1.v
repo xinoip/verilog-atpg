@@ -1,0 +1,30 @@
+module singlepath (N1, N370);
+input N1;
+output N370;
+wire N357, N353, N296, N251, N337, N247, N118, N199, N243, N224, N154, N239, N203, N292, N223, N360, N213, N230, N227, N233, N276, N236, N242, Vcc, gnd;
+not NOT1_1(N118, N1);
+nand NAND2_19(N154, N118, Vcc);
+and AND9_46(N199, N154, Vcc, Vcc, Vcc, Vcc, Vcc, Vcc, Vcc, Vcc);
+not NOT1_47(N203, N199);
+not NOT1_48(N213, N199);
+not NOT1_49(N223, N199);
+xor XOR2_50(N224, N203, N154);
+xor XOR2_51(N227, N203, Vcc);
+xor XOR2_52(N230, N203, Vcc);
+xor XOR2_53(N233, N203, Vcc);
+xor XOR2_54(N236, N203, Vcc);
+xor XOR2_55(N239, N203, Vcc);
+nand NAND2_56(N242, N1, Vcc);
+xor XOR2_57(N243, N203, Vcc);
+xor XOR2_59(N247, N203, Vcc);
+xor XOR2_61(N251, N203, Vcc);
+nand NAND2_74(N276, N239, Vcc);
+nand NAND2_82(N292, N239, Vcc);
+and AND9_86(N296, N276, Vcc, Vcc, Vcc, Vcc, Vcc, Vcc, Vcc, Vcc);
+xor XOR2_106(N337, N276, Vcc);
+nand NAND2_122(N353, N337, Vcc);
+and AND9_126(N357, N353, Vcc, Vcc, Vcc, Vcc, Vcc, Vcc, Vcc, Vcc);
+not NOT1_127(N360, N357);
+not NOT1_128(N370, N357);
+
+endmodule
