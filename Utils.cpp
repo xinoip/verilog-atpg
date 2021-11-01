@@ -127,6 +127,10 @@ std::vector<std::string> Utils::getLinesFromVerilogFile(std::string fileName){
 
             fullLine += line;
 
+            if(line.empty()) {
+                continue;
+            }
+
             if(line.back() == ';' || line == "endmodule"){
                 fullLine = std::regex_replace(fullLine, std::regex(", "), ",");
 
