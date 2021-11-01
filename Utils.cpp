@@ -108,6 +108,32 @@ bool Utils::isValidStringValueForSpiceOption(std::string optionName, std::string
     }
 }
 
+std::vector<std::string> Utils::getLinesFromDelayFile(std::string fileName) {
+    std::vector<std::string> lines;
+    std::ifstream inFile(fileName);
+    if(!inFile){
+        std::cerr << "Delay File could not be opened!" << std::endl;
+    }
+    std::string line;
+    std::string fullLine = "";
+    while(std::getline(inFile, line)){
+        lines.push_back(line);
+    }
+    inFile.close();
+    return lines;
+}
+
+std::vector<std::string> Utils::splitStringByDelimiter(std::string str, char del) {
+    using namespace std;
+    vector<string> internal; 
+    stringstream ss(str);
+    string tok; 
+    while(getline(ss, tok, del)) { 
+        internal.push_back(tok); 
+    } 
+    return internal; 
+}
+
 std::vector<std::string> Utils::getLinesFromVerilogFile(std::string fileName){
     std::vector<std::string> lines;
     std::ifstream inFile(fileName);

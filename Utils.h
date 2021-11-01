@@ -28,6 +28,11 @@ class Utils{
 
         //Reads lines from a Verilog file and creates a line vector
         static std::vector<std::string> getLinesFromVerilogFile(std::string fileName);
+
+        //Reads lines from a Delay file and creates a line vector
+        static std::vector<std::string> getLinesFromDelayFile(std::string fileName);
+
+        static std::vector<std::string> splitStringByDelimiter(std::string str, char del);
 };
 
 #endif // UTILS_H
