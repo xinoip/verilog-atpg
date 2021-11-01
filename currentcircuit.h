@@ -10,6 +10,8 @@ public:
     //No parameter constructor
     CurrentCircuit();
 
+    static void topological_sort();
+
     //Represents the currently processed circuit
     static Circuit circ;
 };

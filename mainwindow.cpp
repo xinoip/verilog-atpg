@@ -68,6 +68,12 @@ void MainWindow::on_convertButton_clicked()
 
         std::cout << "FILE NAME:" << ui->textEdit->toPlainText().toUtf8().constData() << std::endl;
         CurrentCircuit::circ.fillFromVerilogFile(ui->textEdit->toPlainText().toUtf8().constData());
+
+        // CurrentCircuit::circ.print();
+        CurrentCircuit::topological_sort();
+
+        return;
+
         char buffer[256];
         getcwd(buffer, 256 );
         std::string dirname{buffer};
