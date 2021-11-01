@@ -26,7 +26,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     singlepath.cpp \
-    variationmodel.cpp
+    variationmodel.cpp \
+    delay_file.cpp
 
 HEADERS += \
     PLODELib.h \
@@ -37,7 +38,8 @@ HEADERS += \
     delayparser.h \
     mainwindow.h \
     singlepath.h \
-    variationmodel.h
+    variationmodel.h \
+    delay_file.h
 
 FORMS += \
     mainwindow.ui
