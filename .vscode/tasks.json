@@ -1,0 +1,46 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "qmake release",
+            "type": "shell",
+            "command": "qmake-qt5"
+        },
+        {
+            "label": "qmake debug",
+            "type": "shell",
+            "command": "qmake-qt5 CONFIG+=debug"
+        },
+        {
+            "label": "make",
+            "type": "shell",
+            "command": "make"
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "make clean",
+            "problemMatcher": []
+        },
+        {
+            "label": "build debug",
+            "type": "shell",
+            "dependsOn": [
+                "qmake debug",
+                "make"
+            ],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "build release",
+            "type": "shell",
+            "dependsOn": [
+                "qmake release",
+                "make"
+            ],
+            "dependsOrder": "sequence"
+        }
+    ]
+}
