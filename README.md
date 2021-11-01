@@ -10,7 +10,16 @@ To download and run the program correctly:
 
 # Build without QTCreator
 
+For release:
+
 ```
 qmake-qt5 PLODE.pro
+make
+```
+
+For debug:
+
+```
+qmake-qt5 CONFIG+=debug PLODE.pro
 make
 ```
