@@ -4,12 +4,16 @@
 
 CircuitElement::CircuitElement(){
     elementName = "";
+    delay = 0;
+    arrivalTime = 0;
 }
 CircuitElement::CircuitElement(std::string name, CircuitElementType type, std::string subcircuitType)
 {
     elementName = name;
     elementType = type;
     this->subcircuitType = subcircuitType;
+    delay = 0;
+    arrivalTime = 0;
 }
 bool CircuitElement::operator==(const CircuitElement& other)
 {
@@ -26,6 +30,3 @@ bool CircuitElement::isGate(){
         return true;
     }
 }
-
-
-

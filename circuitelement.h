@@ -43,6 +43,10 @@ public:
     //Holds the type of the subcircuit if the circuit element is a subcircuit
     std::string subcircuitType;
 
+    int delay;
+
+    int arrivalTime;
+
     //Overloading of the == operator for circuit element
     bool operator==(const CircuitElement& other);
 
