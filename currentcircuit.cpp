@@ -60,7 +60,8 @@ void CurrentCircuit::topological_sort() {
     
     while (stack.empty() == false) {
         int vertex = stack.top();
-        printf("%s -", circ.elements[vertex].elementName.c_str());
+        auto& element = circ.elements[vertex];
+        printf("%s(d:%d)(a:%d) ", element.elementName.c_str(), element.delay, element.arrivalTime);
         stack.pop();
     }
     printf("\n");
