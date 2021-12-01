@@ -65,6 +65,8 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "qstyleoptiongraphicsitem": "cpp"
+        "qstyleoptiongraphicsitem": "cpp",
+        "optional": "cpp",
+        "shared_mutex": "cpp"
     }
 }
