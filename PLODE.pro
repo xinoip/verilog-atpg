@@ -27,7 +27,8 @@ SOURCES += \
     mainwindow.cpp \
     singlepath.cpp \
     variationmodel.cpp \
-    delay_file.cpp
+    delay_file.cpp \
+    atpg_circuit.cpp
 
 HEADERS += \
     PLODELib.h \
@@ -39,7 +40,9 @@ HEADERS += \
     mainwindow.h \
     singlepath.h \
     variationmodel.h \
-    delay_file.h
+    delay_file.h \
+    atpg_circuit_element.h \
+    atpg_circuit.h
 
 FORMS += \
     mainwindow.ui

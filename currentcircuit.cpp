@@ -2,6 +2,7 @@
 
 #include <stack>
 #include <vector>
+#include "atpg_circuit.h"
 
 Circuit CurrentCircuit::circ;
 
@@ -60,6 +61,7 @@ void CurrentCircuit::topological_sort() {
             topological_sort_helper(circ.elements[i].elementName, visited, stack);
     
     std::vector<std::pair<std::string, int>> top_list {};
+    std::vector<CircuitElement> top_list_circ {};
 
     while (stack.empty() == false) {
         int vertex = stack.top();
@@ -93,6 +95,7 @@ void CurrentCircuit::topological_sort() {
 
         // if(element.isGate()) {
             top_list.push_back({element.elementName, element.arrivalTime});
+            top_list_circ.push_back(element);
         // }
         // printf("%s(d:%d)(a:%d)\n", element.elementName.c_str(), element.delay, element.arrivalTime);
         stack.pop();
@@ -104,6 +107,45 @@ void CurrentCircuit::topological_sort() {
     }
     printf("\n");
 
+    ATPGCircuit atpg_circuit;
+    for(auto& top_element : top_list) {
+        CircuitElement element;
+        for(auto& pair : adj) {
+            if(pair.first.elementName == top_element.first) {
+                element = pair.first;
+                break;
+            }
+        }
+
+        ATPGCircuitElement atpg_element;
+        atpg_element.name = element.elementName;
+        //TODO: only NAND for testing
+        if(element.isGate()) {
+            atpg_element.type = ATPGCircuitElementType::NAND;
+        } else {
+            atpg_element.type = ATPGCircuitElementType::WIRE;
+        }
+        
+        // find outputs
+        for(auto& pair : adj) {
+            if(pair.first.elementName == top_element.first) {
+                for(auto& output : pair.second) {
+                    atpg_element.outputs.push_back(output.elementName);
+                }
+            }
+        }
+
+        // find inputs
+        for(auto& pair : adj) {
+            for(auto& pair_second : pair.second) {
+                if(pair_second.elementName == top_element.first) {
+                    atpg_element.inputs.push_back(pair.first.elementName);
+                }
+            }
+        }
+        atpg_circuit.elements.push_back(atpg_element);
+    }
+
     printf("Critical path:\n");
     int slowest_output_index = 0;
     for(int i = 0, current_max = 0; i < top_list.size(); i++) {
@@ -113,7 +155,10 @@ void CurrentCircuit::topological_sort() {
             slowest_output_index = i;
         }
     }
+    std::vector<std::string> crit_path_names;
+    crit_path_names.push_back(top_list[slowest_output_index].first);
     printf("%s[%d]\n", top_list[slowest_output_index].first.c_str(), top_list[slowest_output_index].second);
+    std::vector<CircuitElement> crit_path_list {};
     while(true) {
         std::vector<CircuitElement> predecessor_elements;
         // get pred elements
@@ -156,9 +201,36 @@ void CurrentCircuit::topological_sort() {
                 break; 
             }
         }
-        printf("%s[%d] \n", slowest_pred.elementName.c_str(), slowest_pred.arrivalTime);
+        crit_path_list.push_back(slowest_pred);
+        // printf("%s[%d] \n", slowest_pred.elementName.c_str(), slowest_pred.arrivalTime);
         slowest_output_index = found_index;
     }
-    // printf("DEBUG slowest output index %d\n", slowest_output_index);
+    // print critical path
+    for(auto& element : crit_path_list) {
+        printf("%s[%d] \n", element.elementName.c_str(), element.arrivalTime);
+        crit_path_names.push_back(element.elementName);
+    }
     printf("\n");
+
+    // sensitize path
+    for(auto& name : crit_path_names) {
+        auto& element = atpg_circuit.get_element(name);
+        if(element.type == ATPGCircuitElementType::WIRE) {
+            element.value = ATPGValue::CRIT_PATH;
+        } else {
+            // assume NAND for now..
+            for(auto& input : element.inputs) {
+                if(std::find(crit_path_names.begin(), crit_path_names.end(), input) != crit_path_names.end()) {
+                    atpg_circuit.get_element(input).value = ATPGValue::CRIT_PATH;
+                } else {
+                    atpg_circuit.get_element(input).value = ATPGValue::ONE;
+                }
+            }
+        }
+    }
+    printf("************************\n");
+    for(auto& element : atpg_circuit.elements) {
+        printf("%s[%d]\n", element.name.c_str(), element.value);
+    }
+    printf("************************\n");
 }

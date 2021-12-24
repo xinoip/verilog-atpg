@@ -1,4 +1,5 @@
 #ifndef CIRCUITELEMENT_H
+
 #define CIRCUITELEMENT_H
 
 #include <QGraphicsItem>
