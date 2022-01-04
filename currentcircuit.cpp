@@ -121,7 +121,12 @@ void CurrentCircuit::topological_sort() {
         atpg_element.name = element.elementName;
         //TODO: only NAND for testing
         if(element.isGate()) {
-            atpg_element.type = ATPGCircuitElementType::NAND;
+            if(element.elementType == CircuitElementType::NAND) {
+                atpg_element.type = ATPGCircuitElementType::NAND;
+            }
+            if(element.elementType == CircuitElementType::NOR) {
+                atpg_element.type = ATPGCircuitElementType::NOR;
+            }
         } else {
             atpg_element.type = ATPGCircuitElementType::WIRE;
         }
