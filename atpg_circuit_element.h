@@ -13,8 +13,8 @@ enum class ATPGCircuitElementType {
 };
 
 enum class ATPGValue {
-    ONE,
     ZERO,
+    ONE,
     DONT_CARE,
     CRIT_PATH,
     NOT_INITIALIZED

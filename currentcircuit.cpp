@@ -212,22 +212,224 @@ void CurrentCircuit::topological_sort() {
     }
     printf("\n");
 
+    ///// SENSITIZATION THINGS BELOW
+
     // sensitize path
+    // initialize crit path wires
     for(auto& name : crit_path_names) {
         auto& element = atpg_circuit.get_element(name);
         if(element.type == ATPGCircuitElementType::WIRE) {
             element.value = ATPGValue::CRIT_PATH;
-        } else {
-            // assume NAND for now..
-            for(auto& input : element.inputs) {
-                if(std::find(crit_path_names.begin(), crit_path_names.end(), input) != crit_path_names.end()) {
-                    atpg_circuit.get_element(input).value = ATPGValue::CRIT_PATH;
-                } else {
-                    atpg_circuit.get_element(input).value = ATPGValue::ONE;
+        }
+    }
+
+    // set offset to non-controlling values on crit path
+    for(auto& name : crit_path_names) {
+        auto& element = atpg_circuit.get_element(name);
+        if(element.type == ATPGCircuitElementType::WIRE) {
+            continue;
+        }
+        // get input values
+        std::vector<ATPGCircuitElement*> inputs;
+        for(auto& input : element.inputs) {
+            auto& input_element = atpg_circuit.get_element(input);
+            inputs.push_back(&input_element);
+        }
+
+        if(inputs.size() != 2) {
+            printf("Only 2 input gates supported!\n");
+            break;
+        }
+
+        switch (element.type)
+        {
+        case ATPGCircuitElementType::NAND:
+        case ATPGCircuitElementType::AND:
+            if(inputs[0]->value == ATPGValue::CRIT_PATH) {
+                if(inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                    inputs[1]->value = ATPGValue::ONE;
+                } else if(inputs[1]->value != ATPGValue::ONE) {
+                    printf("FAULT 248\n");
                 }
+            } else if(inputs[1]->value == ATPGValue::CRIT_PATH) {
+                if(inputs[0]->value == ATPGValue::NOT_INITIALIZED) {
+                    inputs[0]->value = ATPGValue::ONE;
+                } else if(inputs[0]->value != ATPGValue::ONE) {
+                    printf("FAULT 255\n");
+                }
+            }
+            break;
+        case ATPGCircuitElementType::OR:
+        case ATPGCircuitElementType::NOR:
+            if(inputs[0]->value == ATPGValue::CRIT_PATH) {
+                if(inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                    inputs[1]->value = ATPGValue::ZERO;
+                } else if(inputs[1]->value != ATPGValue::ZERO) {
+                    printf("FAULT 265\n");
+                }
+            } else if(inputs[1]->value == ATPGValue::CRIT_PATH) {
+                if(inputs[0]->value == ATPGValue::NOT_INITIALIZED) {
+                    inputs[0]->value = ATPGValue::ZERO;
+                } else if(inputs[0]->value != ATPGValue::ZERO) {
+                    printf("FAULT 271\n");
+                }
+            }
+            break;
+        default:
+            printf("Not supported gate: %d\n", element.type);
+            break;
+        }
+    }
+
+    // justify rest
+    for(auto& element : atpg_circuit.elements) {
+        if(element.type == ATPGCircuitElementType::WIRE) {
+            continue;
+        }
+
+        // get input values
+        std::vector<ATPGCircuitElement*> inputs;
+        bool has_not_initialized = false;
+        for(auto& input : element.inputs) {
+            auto& input_element = atpg_circuit.get_element(input);
+            if(input_element.value == ATPGValue::NOT_INITIALIZED) {
+                has_not_initialized = true;
+            }
+            inputs.push_back(&input_element);
+        }
+        ATPGCircuitElement& output = atpg_circuit.get_element(element.outputs[0]);
+        if(output.value == ATPGValue::NOT_INITIALIZED) {
+            has_not_initialized = true;
+        }
+
+        // this gate is already done
+        if(!has_not_initialized) {
+            continue;
+        }
+
+        if(inputs.size() != 2) {
+            printf("Only 2 input gates supported!\n");
+            break;
+        }
+
+        if(output.value == ATPGValue::NOT_INITIALIZED) {
+            switch (element.type)
+            {
+            case ATPGCircuitElementType::NAND:
+                if(inputs[0]->value == ATPGValue::CRIT_PATH || inputs[1]->value == ATPGValue::CRIT_PATH) {
+                    if(inputs[0]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[0]->value = ATPGValue::ZERO;
+                    }
+                    if(inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[1]->value = ATPGValue::ZERO;
+                    }
+                    output.value = ATPGValue::ONE;
+                } else if(inputs[0]->value == ATPGValue::ZERO || inputs[1]->value == ATPGValue::ZERO) {
+                    if(inputs[0]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[0]->value = ATPGValue::DONT_CARE;
+                    }
+                    if(inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[1]->value = ATPGValue::DONT_CARE;
+                    }
+                    output.value = ATPGValue::ONE;
+                } else if(inputs[0]->value == ATPGValue::ONE && inputs[1]->value == ATPGValue::ONE) {
+                    output.value = ATPGValue::ZERO;
+                } else {
+                    output.value = ATPGValue::DONT_CARE;
+                }
+                break;
+            case ATPGCircuitElementType::NOR:
+                if(inputs[0]->value == ATPGValue::CRIT_PATH || inputs[1]->value == ATPGValue::CRIT_PATH) {
+                    if(inputs[0]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[0]->value = ATPGValue::ONE;
+                    }
+                    if(inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[1]->value = ATPGValue::ONE;
+                    }
+                    output.value = ATPGValue::ZERO;
+                } else if(inputs[0]->value == ATPGValue::ONE || inputs[1]->value == ATPGValue::ONE) {
+                    if(inputs[0]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[0]->value = ATPGValue::DONT_CARE;
+                    }
+                    if(inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[1]->value = ATPGValue::DONT_CARE;
+                    }
+                    output.value = ATPGValue::ZERO;
+                } else if(inputs[0]->value == ATPGValue::ZERO && inputs[1]->value == ATPGValue::ZERO) {
+                    output.value = ATPGValue::ONE;
+                } else {
+                    output.value = ATPGValue::DONT_CARE;
+                }
+                break;
+            default:
+                printf("Not supported gate: %d\n", element.type);
+                break;
+            }
+        } else if(output.value == ATPGValue::DONT_CARE) {
+            // for(auto& value : input_values) {
+            //     if(value == ATPGValue::NOT_INITIALIZED) {
+            //         value = ATPGValue::DONT_CARE;
+            //     }
+            // }
+        } else if(output.value == ATPGValue::ONE) {
+            switch (element.type)
+            {
+            case ATPGCircuitElementType::NAND:
+                if(inputs[0]->value == ATPGValue::ZERO || inputs[1]->value == ATPGValue::ZERO) {
+                    if(inputs[0]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[0]->value = ATPGValue::DONT_CARE;
+                    }
+                    if(inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[1]->value = ATPGValue::DONT_CARE;
+                    }
+                } else if(inputs[0]->value == ATPGValue::NOT_INITIALIZED && inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                    inputs[0]->value = ATPGValue::ZERO;
+                    inputs[1]->value = ATPGValue::DONT_CARE;
+                } else if(inputs[0]->value == ATPGValue::NOT_INITIALIZED) {
+                    inputs[0]->value = ATPGValue::ZERO;
+                } else if(inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                    inputs[1]->value = ATPGValue::ZERO;
+                }
+                break;
+            case ATPGCircuitElementType::NOR:
+                inputs[0]->value = ATPGValue::ZERO;
+                inputs[1]->value = ATPGValue::ZERO;
+                break;
+            default:
+                printf("Not supported gate: %d\n", element.type);
+                break;
+            }
+        } else if(output.value == ATPGValue::ZERO) {
+            switch (element.type)
+            {
+            case ATPGCircuitElementType::NAND:
+                inputs[0]->value = ATPGValue::ONE;
+                inputs[1]->value = ATPGValue::ONE;
+                break;
+            case ATPGCircuitElementType::NOR:
+                if(inputs[0]->value == ATPGValue::ONE || inputs[1]->value == ATPGValue::ONE) {
+                    if(inputs[0]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[0]->value = ATPGValue::DONT_CARE;
+                    }
+                    if(inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                        inputs[1]->value = ATPGValue::DONT_CARE;
+                    }
+                } else if(inputs[0]->value == ATPGValue::NOT_INITIALIZED && inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                    inputs[0]->value = ATPGValue::ONE;
+                    inputs[1]->value = ATPGValue::DONT_CARE;
+                } else if(inputs[0]->value == ATPGValue::NOT_INITIALIZED) {
+                    inputs[0]->value = ATPGValue::ONE;
+                } else if(inputs[1]->value == ATPGValue::NOT_INITIALIZED) {
+                    inputs[1]->value = ATPGValue::ONE;
+                }
+                break;
+            default:
+                printf("Not supported gate: %d\n", element.type);
+                break;
             }
         }
     }
+
     printf("************************\n");
     for(auto& element : atpg_circuit.elements) {
         printf("%s[%d]\n", element.name.c_str(), element.value);
