@@ -12,8 +12,6 @@ CurrentCircuit::CurrentCircuit()
 
 }
 
-bool d_algorithm(ATPGCircuit circ, std::string fault_element_name, char fault);
-
 void topological_sort_helper(std::string element_name, bool visited[], std::stack<int>& stack) {
     Circuit& circ = CurrentCircuit::circ;
     auto& adj = circ.adjacencyList;
@@ -47,6 +45,118 @@ void topological_sort_helper(std::string element_name, bool visited[], std::stac
     }
 
     stack.push(vertex);
+}
+
+ATPGCircuit CurrentCircuit::get_atpg_circuit() {
+    Circuit& circ = CurrentCircuit::circ;
+    auto& adj = circ.adjacencyList;
+    std::stack<int> stack;
+    int vertex_count = circ.elements.size();
+    bool* visited = new bool[vertex_count];
+    for (int i = 0; i < vertex_count; i++)
+        visited[i] = false;
+    
+    for (int i = 0; i < vertex_count; i++)
+        if (visited[i] == false)
+            topological_sort_helper(circ.elements[i].elementName, visited, stack);
+    
+    std::vector<std::pair<std::string, int>> top_list {};
+    std::vector<CircuitElement> top_list_circ {};
+
+    while (stack.empty() == false) {
+        int vertex = stack.top();
+        auto& element = circ.elements[vertex];
+        std::vector<CircuitElement> predecessor_elements;
+
+        for(auto& pair : adj) {
+            auto& second = pair.second;
+            for(auto& connection : second) {
+                if(connection.elementName == element.elementName) {
+                    predecessor_elements.push_back(pair.first);
+                }
+            }
+        }
+        
+        int max_arrival = 0;
+        for(auto& predecessor : predecessor_elements) {
+            int arrival_time = 0;
+            for(int i = 0; i < circ.elements.size(); i++) {
+                if(circ.elements[i].elementName == predecessor.elementName) {
+                    arrival_time = circ.elements[i].arrivalTime;
+                    break;
+                }
+            }
+            if(arrival_time > max_arrival) {
+                max_arrival = arrival_time;
+            }
+        }
+
+        element.arrivalTime += max_arrival + element.delay;
+
+        // if(element.isGate()) {
+            top_list.push_back({element.elementName, element.arrivalTime});
+            top_list_circ.push_back(element);
+        // }
+        // printf("%s(d:%d)(a:%d)\n", element.elementName.c_str(), element.delay, element.arrivalTime);
+        stack.pop();
+    }
+
+    // printf("Topological order: ");
+    // for(auto& element : top_list) {
+    //     printf("%s[%d], ", element.first.c_str(), element.second);
+    // }
+    // printf("\n");
+
+    ATPGCircuit atpg_circuit;
+    for(auto& top_element : top_list) {
+        CircuitElement element;
+        for(auto& pair : adj) {
+            if(pair.first.elementName == top_element.first) {
+                element = pair.first;
+                break;
+            }
+        }
+
+        ATPGCircuitElement atpg_element;
+        atpg_element.name = element.elementName;
+        //TODO: only NAND for testing
+        if(element.isGate()) {
+            if(element.elementType == CircuitElementType::NAND) {
+                atpg_element.type = ATPGCircuitElementType::NAND;
+            }
+            if(element.elementType == CircuitElementType::NOR) {
+                atpg_element.type = ATPGCircuitElementType::NOR;
+            }
+            if(element.elementType == CircuitElementType::OR) {
+                atpg_element.type = ATPGCircuitElementType::OR;
+            }
+            if(element.elementType == CircuitElementType::AND) {
+                atpg_element.type = ATPGCircuitElementType::AND;
+            }
+        } else {
+            atpg_element.type = ATPGCircuitElementType::WIRE;
+        }
+        
+        // find outputs
+        for(auto& pair : adj) {
+            if(pair.first.elementName == top_element.first) {
+                for(auto& output : pair.second) {
+                    atpg_element.outputs.push_back(output.elementName);
+                }
+            }
+        }
+
+        // find inputs
+        for(auto& pair : adj) {
+            for(auto& pair_second : pair.second) {
+                if(pair_second.elementName == top_element.first) {
+                    atpg_element.inputs.push_back(pair.first.elementName);
+                }
+            }
+        }
+        atpg_circuit.elements.push_back(atpg_element);
+    }
+    return atpg_circuit;
 }
 
 void CurrentCircuit::topological_sort() {
@@ -450,101 +560,11 @@ void CurrentCircuit::topological_sort() {
     // printf("************************\n");
 
 
-    //////////////// run D algorithm
-
-    // d frontiers: has input D-D'
-    // j frontiers: output known, input unknown
-
-    d_algorithm(atpg_circuit, "N30", 'D');
-
-    // std::string fault_element_name = "N11";
-    // std::stack<ATPGStep> atpg_step_stack;
-
-    // auto d_frontier_names = atpg_circuit.get_d_frontiers();
-
-    // end condition
-    // if(d_frontier_names.empty()) {
-    //     bool d_reached_po = false;
-    //     for(auto& element : atpg_circuit.elements) {
-    //         if(element.outputs.empty() && (element.cvalue == 'D' || element.cvalue == 'E')) {
-    //             d_reached_po = true;
-    //             break;
-    //         }
-    //     }
-    //     if(d_reached_po) {
-    //         printf("Fault is tested, printing inputs...\n");
-    //     } else {
-    //         printf("Fault not testable!\n");
-    //     }
-    // }
-
-    // // PDF
-    // for(auto& element : atpg_circuit.elements) {
-    //     if(element.name == fault_element_name) {
-    //         element.cvalue = 'D';
-    //         atpg_step_stack.push({"SET", element.name, 'D'});
-
-    //         auto& gate = atpg_circuit.get_element(element.inputs[0]);
-
-    //         // TODO: gate types
-    //         std::vector<char> i0_vector;
-    //         std::vector<char> i1_vector;
-    //         if(gate.type == ATPGCircuitElementType::NAND) {
-    //             for(auto row : gate_and_pdf) {
-    //                 if(row[2] == 'D') {
-    //                     i0_vector.push_back(row[0]);
-    //                     i1_vector.push_back(row[1]);
-    //                 }
-    //             }
-    //         }
-    //         auto gate_inputs = atpg_circuit.get_inputs(gate.name);
-    //         if(i0_vector.size() == 1) {
-    //             gate_inputs[0]->cvalue = i0_vector[0];
-    //             gate_inputs[1]->cvalue = i1_vector[0];
-    //             atpg_step_stack.push({"SET", gate_inputs[0]->name, i0_vector[0]});
-    //             atpg_step_stack.push({"SET", gate_inputs[1]->name, i1_vector[0]});
-    //         } else {
-
-    //         }
-    //     }
-    // }
-
-    // // d-drive PDC
-    // // get d-frontiers
-    // std::vector<std::string> d_frontiers = atpg_circuit.get_d_frontiers();
-
-    // if(d_frontiers.size() == 1) {
-    //     auto& d_propagate = atpg_circuit.get_element(d_frontiers[0]);
-    //     auto d_propagate_inputs = atpg_circuit.get_inputs(d_propagate.name);
-    //     // TODO: gate types
-    //     if(d_propagate.type == ATPGCircuitElementType::NAND) {
-    //         char i0 = d_propagate_inputs[0]->cvalue; // D
-    //         char i1 = d_propagate_inputs[1]->cvalue; // x
-    //         for(auto row : gate_and_pdc) {
-    //             if(row[2] == 'D') {
-    //                 if(i0 == row[0]) {
-    //                     i1 = row[1];
-    //                     break;
-    //                 } else if(i1 == row[1]) {
-    //                     i0 = row[0];
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //         d_propagate_inputs[0]->cvalue = i0;
-    //         d_propagate_inputs[1]->cvalue = i1;
-    //         implication_stack.push({d_propagate_inputs[0]->name, i0, false});
-    //         implication_stack.push({d_propagate_inputs[1]->name, i1, true});
-    //     }
-    // }
-
-    // fault activation
-
-
+    // CurrentCircuit::d_algorithm(atpg_circuit, "N30", 'D');
 }
 
 bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_frontiers, std::string activated_gate);
-bool d_algorithm(ATPGCircuit circ, std::string fault_element_name, char fault) {
+bool CurrentCircuit::d_algorithm(ATPGCircuit circ, std::string fault_element_name, char fault) {
     char gate_and_pdf[3][3] = {
         {'1', '1', 'D'},
         {'0', 'x', 'E'},
@@ -617,7 +637,7 @@ bool d_algorithm(ATPGCircuit circ, std::string fault_element_name, char fault) {
 
     bool result = d_algorithm_helper(circ, {}, activated_gate);
     printf("---- D ALG RESULT BELOW ----\n");
-    printf("Tested for fault %c at %s\n", 'D', fault_element_name.c_str());
+    printf("Tested for fault %c at %s\n", fault, fault_element_name.c_str());
     if(result) {
         printf("Fault is testable!\n");
     } else {
@@ -646,14 +666,6 @@ bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_fron
             break;
         }
     }
-
-    // if(d_frontiers.empty()) {
-    //     if(d_reached_po) {
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
-    // }
 
     if(!d_reached_po) {
         while(true) {

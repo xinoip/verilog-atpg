@@ -40,6 +40,63 @@ void MainWindow::on_browseButton_clicked()
     }
 }
 
+void MainWindow::on_atpgBrowseButton_clicked()
+{
+    CurrentCircuit::circ.submodules.clear();
+    CurrentCircuit::circ.callOrder.clear();
+    CurrentCircuit::circ.adjacencyList.clear();
+
+    QPushButton *convertButton = findChild<QPushButton*>(QString("atpgBrowseButton"));
+    convertButton->setDisabled(false);
+
+    QString file_name = QFileDialog::getOpenFileName(this,"Choose file","C://","Verilog files (*.v)");
+
+    if(!file_name.isEmpty()){
+        ui->atpgFileEdit->setText(file_name);
+    }
+}
+
+void MainWindow::on_dAlgorithmButton_clicked() {
+    QPushButton *convertButton = findChild<QPushButton*>(QString("dAlgorithmButton"));
+    convertButton->setDisabled(true);
+
+    if(ui->atpgFileEdit->toPlainText().toUtf8().constData()[0] == '\0'){
+        std::cout << "File path is empty" << std::endl;
+        QMessageBox::warning(this,"Warning!","A Verilog file must be selected");
+    } else {
+        std::cout << "FILE NAME:" << ui->atpgFileEdit->toPlainText().toUtf8().constData() << std::endl;
+        const char* d_input = ui->dAlgorithmEdit->toPlainText().toUtf8().constData();
+        if(d_input[0] == '\0') {
+            QMessageBox::warning(this,"Warning!","You need to supply input to D-alg like:\n N30 D");
+        } else {
+            std::istringstream iss(d_input);
+            std::string s;
+            int count = 0;
+            std::string fault_element;
+            char fault;
+            while ( getline( iss, s, ' ' ) ) {
+                if(count == 0) {
+                    fault_element = s;
+                }
+                if(count == 1) {
+                    fault = s[0];
+                }
+                count++;
+            }
+
+            if(CurrentCircuit::circ.elements.size()!=0){
+                CurrentCircuit::circ.elements.clear();
+                CurrentCircuit::circ.adjacencyList.clear();
+            }
+
+            CurrentCircuit::circ.fillFromVerilogFile(ui->atpgFileEdit->toPlainText().toUtf8().constData());
+            auto atpg_circ = CurrentCircuit::get_atpg_circuit();
+            CurrentCircuit::d_algorithm(atpg_circ, fault_element, fault);
+        }
+    }
+    convertButton->setDisabled(false);
+}
+
 void MainWindow::on_convertButton_clicked()
 {
     QPushButton *convertButton = findChild<QPushButton*>(QString("convertButton"));

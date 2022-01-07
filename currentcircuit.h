@@ -1,6 +1,7 @@
 #ifndef CURRENTCIRCUIT_H
 #define CURRENTCIRCUIT_H
 #include "circuit.h"
+#include "atpg_circuit.h"
 
 //This class represents the currently processed circuit by PLODE to differantiate
 //between submodules and the main circuit.
@@ -11,6 +12,9 @@ public:
     CurrentCircuit();
 
     static void topological_sort();
+
+    static ATPGCircuit get_atpg_circuit();
+    static bool d_algorithm(ATPGCircuit circ, std::string fault_element_name, char fault);
 
     //Represents the currently processed circuit
     static Circuit circ;

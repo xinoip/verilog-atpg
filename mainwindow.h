@@ -86,6 +86,10 @@ private slots:
 
     void on_plodeResultFileBrowse_clicked();
 
+    void on_dAlgorithmButton_clicked();
+
+    void on_atpgBrowseButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
