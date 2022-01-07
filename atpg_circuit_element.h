@@ -17,7 +17,9 @@ enum class ATPGValue {
     ONE,
     DONT_CARE,
     CRIT_PATH,
-    NOT_INITIALIZED
+    NOT_INITIALIZED,
+    D,
+    D_NOT
 };
 
 class ATPGCircuitElement {
@@ -27,6 +29,10 @@ public:
     ATPGCircuitElementType type;
     std::string name;
     ATPGValue value = ATPGValue::NOT_INITIALIZED;
+    char cvalue = 'x';
+
+    std::string value_to_string();
+    void string_to_value(std::string str);
 };
 
 #endif
