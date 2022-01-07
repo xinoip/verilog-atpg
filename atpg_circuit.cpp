@@ -315,17 +315,20 @@ bool ATPGCircuit::has_conflict(std::string exclude_gate) {
             map_value = GateTables::gate_table_and[map_input];
             break;
         case ATPGCircuitElementType::NAND:
-            // todo change this
-            map_value = GateTables::gate_table_and[map_input];
+            map_value = GateTables::gate_table_nand[map_input];
             break;
         case ATPGCircuitElementType::OR:
+            map_value = GateTables::gate_table_or[map_input];
+            break;
         case ATPGCircuitElementType::NOR:
+            map_value = GateTables::gate_table_nor[map_input];
+            break;
         default:
             printf("Gate type %d is not supported! has_conflict()\n", element.type);
             return true;
         }
 
-        if(map_value != map_output) {
+        if(map_output != "x" && map_value != map_output) {
             return true;
         }
     }

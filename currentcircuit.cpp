@@ -12,7 +12,7 @@ CurrentCircuit::CurrentCircuit()
 
 }
 
-bool d_algorithm(ATPGCircuit circ, std::string fault_element_name);
+bool d_algorithm(ATPGCircuit circ, std::string fault_element_name, char fault);
 
 void topological_sort_helper(std::string element_name, bool visited[], std::stack<int>& stack) {
     Circuit& circ = CurrentCircuit::circ;
@@ -449,7 +449,7 @@ void CurrentCircuit::topological_sort() {
     // d frontiers: has input D-D'
     // j frontiers: output known, input unknown
 
-    d_algorithm(atpg_circuit, "N11");
+    d_algorithm(atpg_circuit, "N11", 'D');
 
     // std::string fault_element_name = "N11";
     // std::stack<ATPGStep> atpg_step_stack;
@@ -538,34 +538,71 @@ void CurrentCircuit::topological_sort() {
 }
 
 bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_frontiers, std::string activated_gate);
-bool d_algorithm(ATPGCircuit circ, std::string fault_element_name) {
-    // PDF
+bool d_algorithm(ATPGCircuit circ, std::string fault_element_name, char fault) {
     char gate_and_pdf[3][3] = {
         {'1', '1', 'D'},
         {'0', 'x', 'E'},
         {'x', '0', 'E'}
+    };
+    char gate_nand_pdf[3][3] = {
+        {'1', '1', 'E'},
+        {'0', 'x', 'D'},
+        {'x', '0', 'D'}
+    };
+    char gate_or_pdf[3][3] = {
+        {'0', '0', 'E'},
+        {'x', '1', 'D'},
+        {'1', 'x', 'D'}
+    };
+    char gate_nor_pdf[3][3] = {
+        {'0', '0', 'D'},
+        {'x', '1', 'E'},
+        {'1', 'x', 'E'}
     };
 
     std::string activated_gate;
 
     for(auto& element : circ.elements) {
         if(element.name == fault_element_name) {
-            element.cvalue = 'D';
+            element.cvalue = fault;
 
             auto& gate = circ.get_element(element.inputs[0]);
 
-            // TODO: gate types
             std::vector<char> i0_vector;
             std::vector<char> i1_vector;
-            if(gate.type == ATPGCircuitElementType::NAND) {
-                for(auto row : gate_and_pdf) {
-                    if(row[2] == 'D') {
-                        i0_vector.push_back(row[0]);
-                        i1_vector.push_back(row[1]);
-                    }
+
+            char (*pdf_table)[3][3];
+            switch (gate.type)
+            {
+            case ATPGCircuitElementType::AND: {
+                pdf_table = &gate_and_pdf;
+                break;
+            }
+            case ATPGCircuitElementType::NAND: {
+                pdf_table = &gate_nand_pdf;
+                break;
+            }
+            case ATPGCircuitElementType::OR: {
+                pdf_table = &gate_or_pdf;
+                break;
+            }
+            case ATPGCircuitElementType::NOR: {
+                pdf_table = &gate_nor_pdf;
+                break;
+            }
+            default:
+                printf("Gate %d is not supported! 581\n", gate.type);
+                return false;
+            }
+
+            for(auto row : *pdf_table) {
+                if(row[2] == fault) {
+                    i0_vector.push_back(row[0]);
+                    i1_vector.push_back(row[1]);
                 }
             }
             auto gate_inputs = circ.get_inputs(gate.name);
+            // TODO: try with other possibilities?
             gate_inputs[0]->cvalue = i0_vector[0];
             gate_inputs[1]->cvalue = i1_vector[0];
             activated_gate = gate.name;
@@ -649,14 +686,24 @@ bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_fron
 
             // set all unassigned inputs of gate to non-controlling value
             auto gate_inputs = circ.get_inputs(gate->name);
+            char fault_type;
             for(auto input : gate_inputs) {
                 if(input->cvalue == 'x') {
                     input->cvalue = non_controlling_value;
+                } else {
+                    fault_type = input->cvalue;
                 }
             }
             auto& gate_output = circ.get_element(gate->outputs[0]);
-            // TODO: change this accordingly to nand/nor and also for D'
-            gate_output.cvalue = 'D';
+            
+            if(gate->type == ATPGCircuitElementType::NAND || gate->type == ATPGCircuitElementType::NOR) {
+                if(fault_type == 'D') {
+                    fault_type = 'E';
+                } else {
+                    fault_type = 'D';
+                }
+            }
+            gate_output.cvalue = fault_type;
 
 
             bool result = d_algorithm_helper(circ, tried_d_frontiers, activated_gate);
