@@ -129,6 +129,12 @@ void CurrentCircuit::topological_sort() {
             if(element.elementType == CircuitElementType::NOR) {
                 atpg_element.type = ATPGCircuitElementType::NOR;
             }
+            if(element.elementType == CircuitElementType::OR) {
+                atpg_element.type = ATPGCircuitElementType::OR;
+            }
+            if(element.elementType == CircuitElementType::AND) {
+                atpg_element.type = ATPGCircuitElementType::AND;
+            }
         } else {
             atpg_element.type = ATPGCircuitElementType::WIRE;
         }
@@ -449,7 +455,7 @@ void CurrentCircuit::topological_sort() {
     // d frontiers: has input D-D'
     // j frontiers: output known, input unknown
 
-    d_algorithm(atpg_circuit, "N11", 'D');
+    d_algorithm(atpg_circuit, "N30", 'D');
 
     // std::string fault_element_name = "N11";
     // std::stack<ATPGStep> atpg_step_stack;

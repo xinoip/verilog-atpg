@@ -328,8 +328,10 @@ bool ATPGCircuit::has_conflict(std::string exclude_gate) {
             return true;
         }
 
-        if(map_output != "x" && map_value != map_output) {
-            return true;
+        if(map_input != "xx") {
+            if(map_output != "x" && map_value != map_output) {
+                return true;
+            }
         }
     }
     return false;
