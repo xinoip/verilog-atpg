@@ -451,6 +451,72 @@ bool CurrentCircuit::d_algorithm(ATPGCircuit circ, std::string fault_element_nam
     printf("---- D ALG RESULT BELOW ----\n");
     printf("Tested for fault %c at %s\n", fault, fault_element_name.c_str());
     if(result) {
+        // last implications
+        for(auto& e : circ.elements) {
+            if(e.type == ATPGCircuitElementType::WIRE) {
+                continue;
+            }
+            std::vector<ATPGCircuitElement*> gate_inputs = circ.get_inputs(e.name);
+
+            int unassigned_count = 0;
+            for(auto input : gate_inputs) {
+                if(input->cvalue == 'x') {
+                    unassigned_count++;
+                }
+            }
+
+            if(unassigned_count == 1) {
+                std::map<std::string, std::string>* gate_map;
+                switch (e.type)
+                {
+                case ATPGCircuitElementType::AND:
+                    gate_map = &GateTables::gate_table_and;
+                    break;
+                case ATPGCircuitElementType::NAND:
+                    gate_map = &GateTables::gate_table_nand;
+                    break;
+                case ATPGCircuitElementType::OR:
+                    gate_map = &GateTables::gate_table_or;
+                    break;
+                case ATPGCircuitElementType::NOR:
+                    gate_map = &GateTables::gate_table_nor;
+                    break;
+                default:
+                    printf("Gate type %d is not supported!()\n", e.type);
+                    return false;
+                }
+                char gate_output = circ.get_element(e.outputs[0]).cvalue;
+                std::string map_output{gate_output};
+
+                int unassigned_index = -1;
+                int assigned_index = -1;
+                for(int i = 0; i < gate_inputs.size(); i++) {
+                    if(gate_inputs[i]->cvalue == 'x') {
+                        unassigned_index = i;
+                        break;
+                    }
+                }
+                if(unassigned_index == 0) {
+                    assigned_index = 1;
+                } else {
+                    assigned_index = 0;
+                }
+
+                // try to set it to 1
+                std::string assigned_value{gate_inputs[assigned_index]->cvalue};
+                std::string map_input = assigned_value + "1";
+                if((*gate_map)[map_input] == map_output) {
+                    gate_inputs[unassigned_index]->cvalue = '1';
+                }
+                // try to set it to 0
+                map_input = assigned_value + "0";
+                if((*gate_map)[map_input] == map_output) {
+                    gate_inputs[unassigned_index]->cvalue = '0';
+                }
+            }
+        }
+        
+
         printf("Fault is testable!\n");
         printf("************************\n");
         for(auto& element : circ.elements) {
@@ -467,7 +533,7 @@ bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_fron
     auto d_frontiers = circ.get_d_frontiers();
     auto j_frontiers = circ.get_j_frontiers();
 
-    if(circ.has_conflict(activated_gate) || d_frontiers.empty()) {
+    if(circ.has_conflict(activated_gate)) {
         return false;
     }
 
@@ -477,6 +543,10 @@ bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_fron
             d_reached_po = true;
             break;
         }
+    }
+
+    if(!d_reached_po && d_frontiers.empty()) {
+        return false;
     }
 
     if(!d_reached_po) {
@@ -544,6 +614,7 @@ bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_fron
         return false;
     }
 
+    j_frontiers = circ.get_j_frontiers();
     // if fault effect reached at least one PO
     if(j_frontiers.size() == 0) {
         return true;
@@ -552,32 +623,42 @@ bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_fron
     // select a gate in J frontier
     ATPGCircuitElement* gate = j_frontiers[0];
 
-    while(true) { // gate not justified
-        auto gate_inputs = circ.get_inputs(gate->name);
+    auto gate_inputs = circ.get_inputs(gate->name);
 
-        // select an unassigned input of gate
-        ATPGCircuitElement* unassigned_input;
-        for(auto input : gate_inputs) {
-            if(input->cvalue == 'x') {
-                unassigned_input = input;
-                break;
-            }
-        }
-
-        if(unassigned_input == nullptr) { // TODO: ??? dunno
-            break;
-        }
-
-        // try to set it to 1
-        unassigned_input->cvalue = '1';
-        bool result = d_algorithm_helper(circ, tried_d_frontiers, activated_gate);
-        if(result) {
-            return true;
-        } else {
-            // try to set it to 0
-            unassigned_input->cvalue = '0';
-        }
+    std::map<std::string, std::string>* gate_map;
+    switch (gate->type)
+    {
+    case ATPGCircuitElementType::AND:
+        gate_map = &GateTables::gate_table_and;
+        break;
+    case ATPGCircuitElementType::NAND:
+        gate_map = &GateTables::gate_table_nand;
+        break;
+    case ATPGCircuitElementType::OR:
+        gate_map = &GateTables::gate_table_or;
+        break;
+    case ATPGCircuitElementType::NOR:
+        gate_map = &GateTables::gate_table_nor;
+        break;
+    default:
+        printf("Gate type %d is not supported!()\n", gate->type);
+        return false;
     }
+    char gate_output = circ.get_element(gate->outputs[0]).cvalue;
+    std::string map_output{gate_output};
 
-    return false;
+    if((*gate_map)["11"] == map_output) {
+        gate_inputs[0]->cvalue = '1';
+        gate_inputs[1]->cvalue = '1';
+    } else if((*gate_map)["10"] == map_output) {
+        gate_inputs[0]->cvalue = '1';
+        gate_inputs[1]->cvalue = '0';
+    } else if((*gate_map)["01"] == map_output) {
+        gate_inputs[0]->cvalue = '0';
+        gate_inputs[1]->cvalue = '1';
+    } else if((*gate_map)["00"] == map_output) {
+        gate_inputs[0]->cvalue = '0';
+        gate_inputs[1]->cvalue = '0';
+    }
+    return d_algorithm_helper(circ, tried_d_frontiers, activated_gate);
 }
