@@ -14,7 +14,7 @@ output G;
 
 wire F;
 
-nand NAND2_1 (F, A, B);
+and AND2_1 (F, A, B);
 nor OR2_1 (G, F, B);
 
 endmodule
