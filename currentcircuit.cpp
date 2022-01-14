@@ -12,6 +12,54 @@ CurrentCircuit::CurrentCircuit()
 
 }
 
+void CurrentCircuit::crit_path(ATPGCircuit circ) {
+    std::vector<std::string> visited;
+    std::vector<ATPGCircuitElement*> pis = circ.get_pis();
+    std::vector<ATPGCircuitElement*> pos = circ.get_pos();
+
+    std::vector<std::string> path;
+    std::stack<ATPGCircuitElement*> traverse;
+
+    // initial start from PO
+    int max_arrival = 0;
+    ATPGCircuitElement* curr = nullptr;
+    for(auto po : pos) {
+        if(po->arrival > max_arrival) {
+            max_arrival = po->arrival;
+            curr = po;
+        }
+    }
+
+    // backtrace
+    while(true) {
+        if(!curr) {
+            // path ended here
+            break;
+        }
+
+        traverse.push(curr);
+        path.emplace_back(curr->name);
+
+        std::vector<ATPGCircuitElement*> inputs = circ.get_inputs(curr->name);
+        max_arrival = -1;
+        ATPGCircuitElement* next = nullptr;
+        for(auto input : inputs) {
+            if(input->arrival > max_arrival) {
+                max_arrival = input->arrival;
+                next = input;
+            }
+        }
+        curr = next;
+    }
+
+    std::reverse(path.begin(), path.end());
+    printf("crit path found\n");
+    for(auto e : path) {
+        printf("%s ", e.c_str());
+    }
+    printf("\n");
+}
+
 bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_frontiers, std::string activated_gate);
 
 bool path_sensitization_helper(ATPGCircuit& circ, bool first_run) {
@@ -63,7 +111,7 @@ bool path_sensitization_helper(ATPGCircuit& circ, bool first_run) {
     return false;
 }
 
-void CurrentCircuit::path_sensitization(ATPGCircuit circ, std::vector<std::string> path) {
+bool CurrentCircuit::path_sensitization(ATPGCircuit circ, std::vector<std::string> path) {
     ///// SENSITIZATION THINGS BELOW
     printf("Trying to sensitize path: ");
     for(auto& e : path) {
@@ -99,7 +147,7 @@ void CurrentCircuit::path_sensitization(ATPGCircuit circ, std::vector<std::strin
                 break;
             default:
                 printf("Gate type %d not supported\n", gate->type);
-                return;
+                return false;
         }
 
         // set all unassigned inputs of gate to non-controlling value
@@ -127,16 +175,16 @@ void CurrentCircuit::path_sensitization(ATPGCircuit circ, std::vector<std::strin
     bool result = path_sensitization_helper(circ, true);
     if(!circ.has_conflict("")) {
         printf("Path is sensitizable!\n");
+        printf("************************\n");
+        for(auto& element : circ.elements) {
+            printf("%s[%c]\n", element.name.c_str(), element.cvalue);
+        }
+        printf("************************\n");
+        return true;
     } else {
         printf("Path is NOT sensitizable!\n");
+        return false;
     }
-
-
-    printf("************************\n");
-    for(auto& element : circ.elements) {
-        printf("%s[%c]\n", element.name.c_str(), element.cvalue);
-    }
-    printf("************************\n");
 }
 
 void topological_sort_helper(std::string element_name, bool visited[], std::stack<int>& stack) {

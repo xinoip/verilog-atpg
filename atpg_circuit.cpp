@@ -126,224 +126,6 @@ std::vector<ATPGCircuitElement*> ATPGCircuit::get_cj_frontiers() {
     return cj_frontiers;
 }
 
-// bool ATPGCircuit::justify_gate(std::string name) {
-//     ATPGCircuitElement& gate = get_element(name);
-//     if(gate.type == ATPGCircuitElementType::WIRE) {
-//         return true;
-//     }
-
-//     // get input values
-//     std::vector<ATPGCircuitElement*> inputs;
-//     for(std::string& input : gate.inputs) {
-//         ATPGCircuitElement& input_element = get_element(input);
-//         inputs.push_back(&input_element);
-//     }
-//     ATPGCircuitElement& output = get_element(gate.outputs[0]);
-
-//     switch (output.value)
-//     {
-//     case ATPGValue::ONE: {
-//         switch (gate.type)
-//         {
-//         case ATPGCircuitElementType::AND: {
-//             for(auto input : inputs) {
-//                 if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                     input->value = ATPGValue::ONE;
-//                 } else if(input->value != ATPGValue::ONE) {
-//                     printf("fault 36\n");
-//                     return false;
-//                 }
-//             }
-//             break;
-//         }
-//         case ATPGCircuitElementType::NAND: {
-//             bool got_zero = false;
-//             int D_count = 0;
-//             int D_not_count = 0;
-//             for(auto input : inputs) {
-//                 if(got_zero) {
-//                     if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                         input->value = ATPGValue::DONT_CARE;
-//                     }
-//                 }
-
-//                 if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                     input->value = ATPGValue::ZERO;
-//                     got_zero = true;
-//                 } else if(input->value == ATPGValue::D) {
-//                     D_count++;
-//                 } else if(input->value == ATPGValue::D_NOT) {
-//                     D_not_count++;
-//                 } else if(input->value == ATPGValue::ZERO) {
-//                     got_zero = true;
-//                 }
-//             }
-//             if(!got_zero) {
-//                 if(!(D_count >= 1 && D_not_count >= 1)) { // case for D-D' inputs
-//                     printf("fault 49\n");
-//                     return false;    
-//                 }
-//             }
-//             break;
-//         }
-//         case ATPGCircuitElementType::OR: {
-//             bool got_one = false;
-//             int D_count = 0;
-//             int D_not_count = 0;
-//             for(auto input : inputs) {
-//                 if(got_one) {
-//                     if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                         input->value = ATPGValue::DONT_CARE;
-//                     }
-//                 }
-
-//                 if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                     input->value = ATPGValue::ONE;
-//                     got_one = true;
-//                 } else if(input->value == ATPGValue::D) {
-//                     D_count++;
-//                 } else if(input->value == ATPGValue::D_NOT) {
-//                     D_not_count++;
-//                 } else if(input->value == ATPGValue::ONE) {
-//                     got_one = true;
-//                 }
-//             }
-//             if(!got_one) {
-//                 if(!(D_count >= 1 && D_not_count >= 1)) { // case for D-D' inputs
-//                     printf("fault 94\n");
-//                     return false;    
-//                 }
-//             }
-//             break;
-//         }
-//         case ATPGCircuitElementType::NOR: {
-//             for(auto input : inputs) {
-//                 if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                     input->value = ATPGValue::ZERO;
-//                 } else if(input->value != ATPGValue::ZERO) {
-//                     printf("fault 104\n");
-//                     return false;
-//                 }
-//             }
-//             break;
-//         }
-//         default: {
-//             printf("unsupported gate type\n");
-//             break;
-//         }
-//         }
-//         break;
-//     }
-    
-//     case ATPGValue::ZERO: {
-//         switch (gate.type)
-//         {
-//         case ATPGCircuitElementType::AND: {
-//             bool got_zero = false;
-//             int D_count = 0;
-//             int D_not_count = 0;
-//             for(auto input : inputs) {
-//                 if(got_zero) {
-//                     if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                         input->value = ATPGValue::DONT_CARE;
-//                     }
-//                 }
-
-//                 if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                     input->value = ATPGValue::ZERO;
-//                     got_zero = true;
-//                 } else if(input->value == ATPGValue::D) {
-//                     D_count++;
-//                 } else if(input->value == ATPGValue::D_NOT) {
-//                     D_not_count++;
-//                 } else if(input->value == ATPGValue::ZERO) {
-//                     got_zero = true;
-//                 }
-//             }
-//             if(!got_zero) {
-//                 if(!(D_count >= 1 && D_not_count >= 1)) { // case for D-D' inputs
-//                     printf("fault 49\n");
-//                     return false;    
-//                 }
-//             }
-//             break;
-//         }
-//         case ATPGCircuitElementType::NAND: {
-//             for(auto input : inputs) {
-//                 if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                     input->value = ATPGValue::ONE;
-//                 } else if(input->value != ATPGValue::ONE) {
-//                     printf("fault 36\n");
-//                     return false;
-//                 }
-//             }
-//             break;
-//         }
-//         case ATPGCircuitElementType::OR: {
-//             for(auto input : inputs) {
-//                 if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                     input->value = ATPGValue::ZERO;
-//                 } else if(input->value != ATPGValue::ZERO) {
-//                     printf("fault 104\n");
-//                     return false;
-//                 }
-//             }
-//             break;
-//         }
-//         case ATPGCircuitElementType::NOR: {
-//             bool got_one = false;
-//             int D_count = 0;
-//             int D_not_count = 0;
-//             for(auto input : inputs) {
-//                 if(got_one) {
-//                     if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                         input->value = ATPGValue::DONT_CARE;
-//                     }
-//                 }
-
-//                 if(input->value == ATPGValue::NOT_INITIALIZED) {
-//                     input->value = ATPGValue::ONE;
-//                     got_one = true;
-//                 } else if(input->value == ATPGValue::D) {
-//                     D_count++;
-//                 } else if(input->value == ATPGValue::D_NOT) {
-//                     D_not_count++;
-//                 } else if(input->value == ATPGValue::ONE) {
-//                     got_one = true;
-//                 }
-//             }
-//             if(!got_one) {
-//                 if(!(D_count >= 1 && D_not_count >= 1)) { // case for D-D' inputs
-//                     printf("fault 94\n");
-//                     return false;    
-//                 }
-//             }
-//             break;
-//         }
-//         default: {
-//             printf("unsupported gate type\n");
-//             break;
-//         }
-//         }
-//         break;
-//     }
-//     case ATPGValue::D:
-//     case ATPGValue::D_NOT:
-//     case ATPGValue::DONT_CARE:
-//     case ATPGValue::NOT_INITIALIZED:
-//     case ATPGValue::CRIT_PATH:
-//     break;
-//     }
-
-//     switch (gate.type)
-//     {
-//     case ATPGCircuitElementType::AND:
-//     case ATPGCircuitElementType::NAND:
-//     case ATPGCircuitElementType::OR:
-//     case ATPGCircuitElementType::NOR:
-//     }
-// }
-
 bool ATPGCircuit::has_conflict(std::string exclude_gate) {
     for(auto& element : elements) {
         if(element.type == ATPGCircuitElementType::WIRE) {
@@ -388,4 +170,23 @@ bool ATPGCircuit::has_conflict(std::string exclude_gate) {
         }
     }
     return false;
+}
+
+std::vector<ATPGCircuitElement*> ATPGCircuit::get_pos() {
+    std::vector<ATPGCircuitElement*> pos;
+    for(auto& e : elements) {
+        if(e.outputs.size() == 0) {
+            pos.push_back(&e);
+        }
+    }
+    return pos;
+}
+std::vector<ATPGCircuitElement*> ATPGCircuit::get_pis() {
+    std::vector<ATPGCircuitElement*> pis;
+    for(auto& e : elements) {
+        if(e.inputs.size() == 0) {
+            pis.push_back(&e);
+        }
+    }
+    return pis;
 }

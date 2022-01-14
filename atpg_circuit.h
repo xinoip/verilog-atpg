@@ -25,6 +25,9 @@ public:
     std::vector<ATPGCircuitElement*> get_c_frontiers();
     std::vector<ATPGCircuitElement*> get_cj_frontiers();
 
+    std::vector<ATPGCircuitElement*> get_pos();
+    std::vector<ATPGCircuitElement*> get_pis();
+
     bool has_conflict(std::string exclude_gate);
 };
 

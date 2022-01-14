@@ -13,8 +13,8 @@ public:
 
     static ATPGCircuit get_atpg_circuit();
     static bool d_algorithm(ATPGCircuit circ, std::string fault_element_name, char fault);
-    static void path_sensitization(ATPGCircuit circ, std::vector<std::string> path);
-    // static void crit_path(ATPGCircuit circ);
+    static bool path_sensitization(ATPGCircuit circ, std::vector<std::string> path);
+    static void crit_path(ATPGCircuit circ);
 
     //Represents the currently processed circuit
     static Circuit circ;
