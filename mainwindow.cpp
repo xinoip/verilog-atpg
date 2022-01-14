@@ -97,6 +97,39 @@ void MainWindow::on_dAlgorithmButton_clicked() {
     convertButton->setDisabled(false);
 }
 
+void MainWindow::on_pathAlgorithmButton_clicked() {
+    QPushButton *convertButton = findChild<QPushButton*>(QString("pathAlgorithmButton"));
+    convertButton->setDisabled(true);
+
+    if(ui->atpgFileEdit->toPlainText().toUtf8().constData()[0] == '\0'){
+        std::cout << "File path is empty" << std::endl;
+        QMessageBox::warning(this,"Warning!","A Verilog file must be selected");
+    } else {
+        std::cout << "FILE NAME:" << ui->atpgFileEdit->toPlainText().toUtf8().constData() << std::endl;
+        const char* path_input = ui->pathAlgorithmEdit->toPlainText().toUtf8().constData();
+        if(path_input[0] == '\0') {
+            QMessageBox::warning(this,"Warning!","You need to supply path as input to Path-alg like:\n N1 NAND2_2 N3 OR2_1 N4 ...");
+        } else {
+            std::istringstream iss(path_input);
+            std::string s;
+            std::vector<std::string> path;
+            while ( getline( iss, s, ' ' ) ) {
+                path.push_back(s);
+            }
+
+            if(CurrentCircuit::circ.elements.size()!=0){
+                CurrentCircuit::circ.elements.clear();
+                CurrentCircuit::circ.adjacencyList.clear();
+            }
+
+            CurrentCircuit::circ.fillFromVerilogFile(ui->atpgFileEdit->toPlainText().toUtf8().constData());
+            auto atpg_circ = CurrentCircuit::get_atpg_circuit();
+            CurrentCircuit::path_sensitization(atpg_circ, path);
+        }
+    }
+    convertButton->setDisabled(false);
+}
+
 void MainWindow::on_convertButton_clicked()
 {
     QPushButton *convertButton = findChild<QPushButton*>(QString("convertButton"));

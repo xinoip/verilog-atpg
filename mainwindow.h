@@ -90,6 +90,8 @@ private slots:
 
     void on_atpgBrowseButton_clicked();
 
+    void on_pathAlgorithmButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

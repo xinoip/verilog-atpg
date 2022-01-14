@@ -22,6 +22,8 @@ public:
 
     std::vector<ATPGCircuitElement*> get_d_frontiers();
     std::vector<ATPGCircuitElement*> get_j_frontiers();
+    std::vector<ATPGCircuitElement*> get_c_frontiers();
+    std::vector<ATPGCircuitElement*> get_cj_frontiers();
 
     bool has_conflict(std::string exclude_gate);
 };

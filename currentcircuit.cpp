@@ -12,6 +12,133 @@ CurrentCircuit::CurrentCircuit()
 
 }
 
+bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_frontiers, std::string activated_gate);
+
+bool path_sensitization_helper(ATPGCircuit& circ, bool first_run) {
+    auto cj_frontiers = circ.get_cj_frontiers();
+
+    if(!first_run && circ.has_conflict("")) {
+        return false;
+    }
+
+    if(first_run) {
+        first_run = false;
+    }
+
+    // if fault effect reached at least one PO
+    if(cj_frontiers.size() == 0) {
+        return true;
+    }
+
+    // select a gate in J frontier
+    ATPGCircuitElement* gate = cj_frontiers[0];
+
+    while(true) { // gate not justified
+        auto gate_inputs = circ.get_inputs(gate->name);
+
+        // select an unassigned input of gate
+        ATPGCircuitElement* unassigned_input = nullptr;
+        for(auto input : gate_inputs) {
+            if(input->cvalue == 'x') {
+                unassigned_input = input;
+                break;
+            }
+        }
+
+        if(unassigned_input == nullptr) { // TODO: ??? dunno
+            break;
+        }
+
+        // try to set it to 1
+        unassigned_input->cvalue = '1';
+        bool result = path_sensitization_helper(circ, first_run);
+        if(result) {
+            return true;
+        } else {
+            // try to set it to 0
+            unassigned_input->cvalue = '0';
+        }
+    }
+
+    return false;
+}
+
+void CurrentCircuit::path_sensitization(ATPGCircuit circ, std::vector<std::string> path) {
+    ///// SENSITIZATION THINGS BELOW
+    printf("Trying to sensitize path: ");
+    for(auto& e : path) {
+        printf("%s ", e.c_str());
+    }
+    printf("\n");
+
+    // sensitize path
+    // initialize path wires
+    for(auto& name : path) {
+        auto& element = circ.get_element(name);
+        if(element.type == ATPGCircuitElementType::WIRE) {
+            element.cvalue = 'C';
+        }
+    }
+
+    // C-drive
+    auto c_frontiers = circ.get_c_frontiers();
+    for(int i = 0; i < c_frontiers.size(); i++) {
+        ATPGCircuitElement* gate = c_frontiers[i];
+
+        // find non controlling value for gate
+        char non_controlling_value;
+        switch (gate->type)
+        {
+            case ATPGCircuitElementType::AND:
+            case ATPGCircuitElementType::NAND:
+                non_controlling_value = '1';
+                break;
+            case ATPGCircuitElementType::OR:
+            case ATPGCircuitElementType::NOR:
+                non_controlling_value = '0';
+                break;
+            default:
+                printf("Gate type %d not supported\n", gate->type);
+                return;
+        }
+
+        // set all unassigned inputs of gate to non-controlling value
+        auto gate_inputs = circ.get_inputs(gate->name);
+        char fault_type;
+        for(auto input : gate_inputs) {
+            if(input->cvalue == 'x') {
+                input->cvalue = non_controlling_value;
+            } else {
+                fault_type = input->cvalue;
+            }
+        }
+        auto& gate_output = circ.get_element(gate->outputs[0]);
+        fault_type = 'C';
+        // if(gate->type == ATPGCircuitElementType::NAND || gate->type == ATPGCircuitElementType::NOR) {
+        //     if(fault_type == 'D') {
+        //         fault_type = 'E';
+        //     } else {
+        //         fault_type = 'D';
+        //     }
+        // }
+        gate_output.cvalue = fault_type;
+    }
+
+    bool result = path_sensitization_helper(circ, true);
+    if(!circ.has_conflict("")) {
+        printf("Path is sensitizable!\n");
+    } else {
+        printf("Path is NOT sensitizable!\n");
+    }
+
+
+    printf("************************\n");
+    for(auto& element : circ.elements) {
+        printf("%s[%c]\n", element.name.c_str(), element.cvalue);
+    }
+    printf("************************\n");
+}
+
 void topological_sort_helper(std::string element_name, bool visited[], std::stack<int>& stack) {
     Circuit& circ = CurrentCircuit::circ;
     auto& adj = circ.adjacencyList;
@@ -563,7 +690,6 @@ void CurrentCircuit::topological_sort() {
     // CurrentCircuit::d_algorithm(atpg_circuit, "N30", 'D');
 }
 
-bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_frontiers, std::string activated_gate);
 bool CurrentCircuit::d_algorithm(ATPGCircuit circ, std::string fault_element_name, char fault) {
     char gate_and_pdf[3][3] = {
         {'1', '1', 'D'},

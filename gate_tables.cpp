@@ -26,6 +26,12 @@ std::map<std::string, std::string> GateTables::gate_table_and = {
     {"Ex", "x"},
     {"ED", "0"},
     {"EE", "E"},
+    {"C0", "0"},
+    {"C1", "C"},
+    {"Cx", "x"},
+    {"0C", "0"},
+    {"1C", "C"},
+    {"xC", "x"},
 };
 
 std::map<std::string, std::string> GateTables::gate_table_nand = {
@@ -54,6 +60,12 @@ std::map<std::string, std::string> GateTables::gate_table_nand = {
     {"Ex", "x"},
     {"ED", "1"},
     {"EE", "D"},
+    {"C0", "1"},
+    {"C1", "C"},
+    {"Cx", "x"},
+    {"0C", "1"},
+    {"1C", "C"},
+    {"xC", "x"},
 };
 
 std::map<std::string, std::string> GateTables::gate_table_or = {
@@ -82,6 +94,12 @@ std::map<std::string, std::string> GateTables::gate_table_or = {
     {"Ex", "x"},
     {"ED", "1"},
     {"EE", "E"},
+    {"C0", "C"},
+    {"C1", "1"},
+    {"Cx", "x"},
+    {"0C", "C"},
+    {"1C", "1"},
+    {"xC", "x"},
 };
 
 std::map<std::string, std::string> GateTables::gate_table_nor = {
@@ -110,4 +128,10 @@ std::map<std::string, std::string> GateTables::gate_table_nor = {
     {"Ex", "x"},
     {"ED", "0"},
     {"EE", "D"},
+    {"C0", "C"},
+    {"C1", "0"},
+    {"Cx", "x"},
+    {"0C", "C"},
+    {"1C", "0"},
+    {"xC", "x"},
 };

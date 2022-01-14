@@ -73,6 +73,59 @@ std::vector<ATPGCircuitElement*> ATPGCircuit::get_j_frontiers() {
     return j_frontiers;
 }
 
+// input and output has C
+std::vector<ATPGCircuitElement*> ATPGCircuit::get_c_frontiers() {
+    std::vector<ATPGCircuitElement*> c_frontiers;
+    for(auto& element : elements) {
+        if(element.type == ATPGCircuitElementType::WIRE) {
+            continue;
+        }
+
+        auto gate_inputs = get_inputs(element.name);
+        auto& output = get_element(element.outputs[0]);
+        if(output.cvalue != 'C') {
+            continue;
+        }
+
+        for(auto input : gate_inputs) {
+            if(input->cvalue == 'C') {
+                c_frontiers.push_back(&get_element(element.name));
+                break;
+            }
+        }
+    }
+    return c_frontiers;
+}
+
+// output known, 1 or more inputs unknown
+std::vector<ATPGCircuitElement*> ATPGCircuit::get_cj_frontiers() {
+    std::vector<ATPGCircuitElement*> cj_frontiers;
+    for(auto& element : elements) {
+        if(element.type == ATPGCircuitElementType::WIRE) {
+            continue;
+        }
+
+        auto gate_inputs = get_inputs(element.name);
+        auto& output = get_element(element.outputs[0]);
+        if(output.cvalue == 'x') {
+            continue;
+        }
+
+        bool one_x = false;
+        for(auto input : gate_inputs) {
+            if(input->cvalue == 'x') {
+                one_x = true;
+                break;
+            }
+        }
+
+        if(one_x) {
+            cj_frontiers.push_back(&get_element(element.name));
+        }
+    }
+    return cj_frontiers;
+}
+
 // bool ATPGCircuit::justify_gate(std::string name) {
 //     ATPGCircuitElement& gate = get_element(name);
 //     if(gate.type == ATPGCircuitElementType::WIRE) {
