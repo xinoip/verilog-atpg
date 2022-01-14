@@ -190,3 +190,20 @@ std::vector<ATPGCircuitElement*> ATPGCircuit::get_pis() {
     }
     return pis;
 }
+
+void ATPGCircuit::print_pattern() {
+    std::vector<ATPGCircuitElement*> pis = get_pis();
+    std::vector<ATPGCircuitElement*> pos = get_pos();
+
+    printf("- Generated Pattern -\n");
+    printf("PIs: ");
+    for(auto pi : pis) {
+        printf("%s[%c] ", pi->name.c_str(), pi->cvalue);
+    }
+    printf("\n");
+    printf("POs: ");
+    for(auto po : pos) {
+        printf("%s[%c] ", po->name.c_str(), po->cvalue);
+    }
+    printf("\n");
+}

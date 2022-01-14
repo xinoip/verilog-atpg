@@ -32,34 +32,59 @@ void CurrentCircuit::crit_path(ATPGCircuit circ) {
         }
     }
 
-    // backtrace
-    while(true) {
-        if(!curr) {
-            // path ended here
-            break;
-        }
+    bool found = false;
+    traverse.push(curr);
+    while(!traverse.empty()) {
+        curr = traverse.top();
+        visited.push_back(curr->name);
+        path.push_back(curr->name);
 
-        traverse.push(curr);
-        path.emplace_back(curr->name);
+        if(curr->inputs.size() != 0) { // node
+            std::vector<ATPGCircuitElement*> inputs = circ.get_inputs(curr->name);
+            max_arrival = -1;
+            ATPGCircuitElement* next = nullptr;
+            for(auto input : inputs) {
+                if(std::find(visited.begin(), visited.end(), input->name) == visited.end()) {
+                    // not visited
+                    if(input->arrival > max_arrival) {
+                        max_arrival = input->arrival;
+                        next = input;
+                    }
+                }
+            }
 
-        std::vector<ATPGCircuitElement*> inputs = circ.get_inputs(curr->name);
-        max_arrival = -1;
-        ATPGCircuitElement* next = nullptr;
-        for(auto input : inputs) {
-            if(input->arrival > max_arrival) {
-                max_arrival = input->arrival;
-                next = input;
+            if(!next) {
+                traverse.pop();
+            } else {
+                traverse.push(next);
+            }
+        } else { // PI node
+            path.clear();
+            std::stack<ATPGCircuitElement*> copy_traverse = traverse;
+            while(!copy_traverse.empty()) {
+                ATPGCircuitElement* element = copy_traverse.top();
+                copy_traverse.pop();
+                path.push_back(element->name);
+            }
+            bool sensitizable = path_sensitization(circ, path);
+            if(sensitizable) {
+                found = true;
+                break;
+            } else {
+                traverse.pop();
             }
         }
-        curr = next;
     }
 
-    std::reverse(path.begin(), path.end());
-    printf("crit path found\n");
-    for(auto e : path) {
-        printf("%s ", e.c_str());
+    if(found) {
+        printf("Sensitizable critical path found\n");
+        for(auto e : path) {
+            printf("%s ", e.c_str());
+        }
+        printf("\n");
+    } else {
+        printf("There are no sensitizable critical paths available\n");
     }
-    printf("\n");
 }
 
 bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_frontiers, std::string activated_gate);
@@ -182,6 +207,7 @@ bool CurrentCircuit::path_sensitization(ATPGCircuit circ, std::vector<std::strin
             printf("%s[%c]\n", element.name.c_str(), element.cvalue);
         }
         printf("************************\n");
+        circ.print_pattern();
         return true;
     } else {
         printf("Path is NOT sensitizable!\n");
@@ -426,15 +452,15 @@ bool CurrentCircuit::d_algorithm(ATPGCircuit circ, std::string fault_element_nam
     printf("Tested for fault %c at %s\n", fault, fault_element_name.c_str());
     if(result) {
         printf("Fault is testable!\n");
+        printf("************************\n");
+        for(auto& element : circ.elements) {
+            printf("%s[%c]\n", element.name.c_str(), element.cvalue);
+        }
+        printf("************************\n");
+        circ.print_pattern();
     } else {
         printf("Fault NOT testable!\n");
     }
-
-    printf("************************\n");
-    for(auto& element : circ.elements) {
-        printf("%s[%c]\n", element.name.c_str(), element.cvalue);
-    }
-    printf("************************\n");
 }
 
 bool d_algorithm_helper(ATPGCircuit& circ, std::vector<std::string> tried_d_frontiers, std::string activated_gate) {

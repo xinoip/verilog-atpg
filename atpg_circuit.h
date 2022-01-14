@@ -28,6 +28,8 @@ public:
     std::vector<ATPGCircuitElement*> get_pos();
     std::vector<ATPGCircuitElement*> get_pis();
 
+    void print_pattern();
+
     bool has_conflict(std::string exclude_gate);
 };
 
