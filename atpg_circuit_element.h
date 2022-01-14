@@ -30,6 +30,8 @@ public:
     std::string name;
     ATPGValue value = ATPGValue::NOT_INITIALIZED;
     char cvalue = 'x';
+    int delay = 0;
+    int arrival = 0;
 
     std::string value_to_string();
     void string_to_value(std::string str);
