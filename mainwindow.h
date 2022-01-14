@@ -92,6 +92,10 @@ private slots:
 
     void on_pathAlgorithmButton_clicked();
 
+    void on_delayBrowseButton_clicked();
+
+    void on_criticalPathButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

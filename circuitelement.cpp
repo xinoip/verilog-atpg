@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include "delay_file.h"
+#include "currentcircuit.h"
 
 CircuitElement::CircuitElement(){
     elementName = "";
@@ -10,7 +11,7 @@ CircuitElement::CircuitElement(){
 }
 CircuitElement::CircuitElement(std::string name, CircuitElementType type, std::string subcircuitType)
 {
-    DelayFile delay_file{"/home/pio/repo/plode-pio/foo.txt"};
+    DelayFile delay_file{CurrentCircuit::delay_file_name};
     elementName = name;
     elementType = type;
     this->subcircuitType = subcircuitType;

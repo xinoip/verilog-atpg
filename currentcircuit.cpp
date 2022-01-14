@@ -7,6 +7,8 @@
 
 Circuit CurrentCircuit::circ;
 
+std::string CurrentCircuit::delay_file_name;
+
 CurrentCircuit::CurrentCircuit()
 {
 

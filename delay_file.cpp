@@ -7,6 +7,9 @@
 DelayFile::DelayFile(std::string file_name) : m_file_name(file_name) {
     using namespace std;
     ifstream in_file;
+    if(file_name.empty()) {
+        return;
+    }
     in_file.open(file_name);
     if (!in_file) {
         cerr << "Unable to open delay file \"" << file_name << "\"" << endl;

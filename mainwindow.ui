@@ -1843,7 +1843,7 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_24">
+          <layout class="QHBoxLayout" name="horizontalLayout_24" stretch="0,0">
            <item>
             <widget class="QTextEdit" name="dAlgorithmEdit">
              <property name="minimumSize">
@@ -1936,6 +1936,94 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="text">
             <string>Run</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_3">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>350</y>
+          <width>1001</width>
+          <height>91</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_26">
+         <item>
+          <widget class="QLabel" name="label_20">
+           <property name="text">
+            <string>Delay File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextEdit" name="delayFileEdit">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>KerkisSans</family>
+             <pointsize>12</pointsize>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="delayBrowseButton">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_4">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>460</y>
+          <width>1001</width>
+          <height>91</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_27">
+         <item>
+          <widget class="QLabel" name="label_21">
+           <property name="text">
+            <string>Critical Path</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="criticalPathButton">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Find</string>
            </property>
           </widget>
          </item>

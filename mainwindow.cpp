@@ -56,6 +56,52 @@ void MainWindow::on_atpgBrowseButton_clicked()
     }
 }
 
+void MainWindow::on_delayBrowseButton_clicked()
+{
+    CurrentCircuit::circ.submodules.clear();
+    CurrentCircuit::circ.callOrder.clear();
+    CurrentCircuit::circ.adjacencyList.clear();
+
+    QPushButton *convertButton = findChild<QPushButton*>(QString("delayBrowseButton"));
+    convertButton->setDisabled(false);
+
+    QString file_name = QFileDialog::getOpenFileName(this,"Choose file","C://","Delay txt files (*.txt)");
+
+    if(!file_name.isEmpty()){
+        ui->delayFileEdit->setText(file_name);
+    }
+}
+
+void MainWindow::on_criticalPathButton_clicked() {
+    QPushButton *convertButton = findChild<QPushButton*>(QString("criticalPathButton"));
+    convertButton->setDisabled(true);
+
+    if(ui->atpgFileEdit->toPlainText().toUtf8().constData()[0] == '\0'){
+        std::cout << "File path is empty" << std::endl;
+        QMessageBox::warning(this,"Warning!","A Verilog file must be selected");
+    } else {
+        std::cout << "FILE NAME:" << ui->atpgFileEdit->toPlainText().toUtf8().constData() << std::endl;
+
+        if(ui->delayFileEdit->toPlainText().toUtf8().constData()[0] == '\0') {
+            std::cout << "delay File path is empty" << std::endl;
+            QMessageBox::warning(this,"Warning!","A Delay file must be selected");
+            convertButton->setDisabled(false);
+            return;
+        }
+
+        if(CurrentCircuit::circ.elements.size()!=0){
+            CurrentCircuit::circ.elements.clear();
+            CurrentCircuit::circ.adjacencyList.clear();
+        }
+
+        CurrentCircuit::delay_file_name = ui->delayFileEdit->toPlainText().toUtf8().constData();
+        CurrentCircuit::circ.fillFromVerilogFile(ui->atpgFileEdit->toPlainText().toUtf8().constData());
+        auto atpg_circ = CurrentCircuit::get_atpg_circuit();
+        CurrentCircuit::crit_path(atpg_circ);
+    }
+    convertButton->setDisabled(false);
+}
+
 void MainWindow::on_dAlgorithmButton_clicked() {
     QPushButton *convertButton = findChild<QPushButton*>(QString("dAlgorithmButton"));
     convertButton->setDisabled(true);
@@ -159,10 +205,6 @@ void MainWindow::on_convertButton_clicked()
 
         std::cout << "FILE NAME:" << ui->textEdit->toPlainText().toUtf8().constData() << std::endl;
         CurrentCircuit::circ.fillFromVerilogFile(ui->textEdit->toPlainText().toUtf8().constData());
-
-        auto atpg = CurrentCircuit::get_atpg_circuit();
-        CurrentCircuit::crit_path(atpg);
-        return;
 
         char buffer[256];
         getcwd(buffer, 256 );

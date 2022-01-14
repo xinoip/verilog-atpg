@@ -16,6 +16,8 @@ public:
     static bool path_sensitization(ATPGCircuit circ, std::vector<std::string> path);
     static void crit_path(ATPGCircuit circ);
 
+    static std::string delay_file_name;
+
     //Represents the currently processed circuit
     static Circuit circ;
 };
