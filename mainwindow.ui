@@ -1753,145 +1753,13 @@ p, li { white-space: pre-wrap; }
        <attribute name="title">
         <string>ATPG</string>
        </attribute>
-       <widget class="QWidget" name="layoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>1001</width>
-          <height>191</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_13">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetFixedSize</enum>
-         </property>
-         <item>
-          <widget class="QLabel" name="atpg_label_19">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Verilog file to test:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_23">
-           <item>
-            <layout class="QGridLayout" name="gridLayout_3"/>
-           </item>
-           <item>
-            <widget class="QTextEdit" name="atpgFileEdit">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>KerkisSans</family>
-               <pointsize>12</pointsize>
-               <weight>50</weight>
-               <bold>false</bold>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="atpgBrowseButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Browse...</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QLabel" name="atpg_label_20">
-           <property name="text">
-            <string>D-Algorithm</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_24" stretch="0,0">
-           <item>
-            <widget class="QTextEdit" name="dAlgorithmEdit">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>KerkisSans</family>
-               <pointsize>12</pointsize>
-               <weight>50</weight>
-               <bold>false</bold>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="dAlgorithmButton">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Run</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
        <widget class="QWidget" name="layoutWidget_2">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>240</y>
+          <y>110</y>
           <width>1001</width>
-          <height>91</height>
+          <height>41</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_25">
@@ -1945,9 +1813,9 @@ p, li { white-space: pre-wrap; }
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>350</y>
+          <y>160</y>
           <width>1001</width>
-          <height>91</height>
+          <height>41</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_26">
@@ -2001,16 +1869,16 @@ p, li { white-space: pre-wrap; }
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>460</y>
+          <y>210</y>
           <width>1001</width>
-          <height>91</height>
+          <height>41</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_27">
          <item>
           <widget class="QLabel" name="label_21">
            <property name="text">
-            <string>Critical Path</string>
+            <string>Path Delay Fault - Critical Path</string>
            </property>
           </widget>
          </item>
@@ -2024,6 +1892,136 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="text">
             <string>Find</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>70</y>
+          <width>1001</width>
+          <height>32</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_23">
+         <item>
+          <widget class="QLabel" name="atpg_label_20">
+           <property name="text">
+            <string>Stuck-at Fault</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextEdit" name="dAlgorithmEdit">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>KerkisSans</family>
+             <pointsize>12</pointsize>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="dAlgorithmButton">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Run</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>1001</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_24">
+         <item>
+          <widget class="QLabel" name="atpg_label_19">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Verilog file to test:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextEdit" name="atpgFileEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>KerkisSans</family>
+             <pointsize>12</pointsize>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="atpgBrowseButton">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Browse...</string>
            </property>
           </widget>
          </item>
