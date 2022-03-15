@@ -1,30 +1,47 @@
-# PLODE
-Precise Logic and Delay (PLODE) is a tool that converts a Structural Verilog to a Spice deck, executes Spice simulations using ngspice and performs analysis of the Spice results to extract output delays and logic values. It can handle hierarchical Verilog with nested module instantiations. It takes into consideration glitches at the outputs in computing the output logic values and delays.</br>
+# verilog-atpg
 
-To download and run the program correctly:
-1. Download ngspice from its website and do its installation.
-2. Download QT Creator with QT5 and QTCharts support.
-3. Once all downloaded, it can be opened on QT Creator by opening the .pro file with QT Creator.
-4. After building, PLODE GUI is ready to go.
+[demo video](https://www.youtube.com/watch?v=DSQ6wMlrREo)
 
+This tool takes a Structural Verilog source code as an input and applies ATPG algorithms to that circuit. Algorithm results will generate input and output signal patterns that will test the resulting circuit for manufacturing defects.
 
-# Build without QTCreator
+# Features
 
-For release:
+verilog-atpg can do the following:
 
+- Generate ATPG for stuck-at-0 fault
+- Generate ATPG for stuck-at-1 fault
+- Delay timing analysis
+- Critical path calculation from delays
+- Path sensitization
+- Critical path sensitization
+- Delay fault detection
+- False path detection
+
+# Build
+
+You can use QTCreator with provided `.PRO` file but if you wish to build without QTCreator you can use following.
+
+Get required QT dependencies. For ubuntu:
+
+```bash
+sudo apt install qt5-default qt5-qmake libqt5charts5-dev qtmultimedia5-dev
 ```
-qmake-qt5 PLODE.pro
+
+Build the project.
+
+```bash
+qmake
 make
 ```
 
-For debug:
+For debug you can build the project like following:
 
-```
-qmake-qt5 CONFIG+=debug PLODE.pro
+```bash
+qmake CONFIG+=debug
 make
 ```
 
-# Some test cases
+## Some test cases
 
 ```txt
 dcirc1 N30 stuck-at-0
@@ -62,7 +79,7 @@ POs: N7[C]
 provided 3 delay files for test circuits
 ```
 
-# Test Circuits
+## Test Circuits
 
 d_test_circ_1.v
 
